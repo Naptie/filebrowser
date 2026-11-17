@@ -1,0 +1,48 @@
+name: build win exe
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "git ref to build (tag, branch or commit)"
+        default: "v2.1.5-beta"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: frontend/.nvmrc
+
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+
+      - name: Build backend (windows amd64)
+        working-directory: backend
+        run: go build -ldflags "-s -w" -o filebrowser.exe .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: filebrowser-windows
+          path: backend/filebrowser.exe
+          retention-days: 7
