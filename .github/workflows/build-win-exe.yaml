@@ -30,7 +30,12 @@ jobs:
         shell: bash
         run: |
           npm install --no-audit --no-fund
-          npm run build
+          # package.json build script is unix-only and npm on windows runs it via cmd.exe,
+          # so replicate it here under bash instead of `npm run build`
+          mkdir -p ../backend/internal/web/embed
+          rm -rf ../backend/internal/web/embed/*
+          npx vite build
+          cp -r ../backend/internal/web/dist/* ../backend/internal/web/embed/
 
       - name: Set up Go
         uses: actions/setup-go@v5
