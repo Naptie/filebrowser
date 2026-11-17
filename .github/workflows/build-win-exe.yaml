@@ -27,6 +27,7 @@ jobs:
 
       - name: Build frontend
         working-directory: frontend
+        shell: bash
         run: |
           npm install --no-audit --no-fund
           npm run build
